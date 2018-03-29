@@ -9,4 +9,4 @@
 ===============================================================================
 */
 
-export const password = 'premature optimization is the root of all evil'
+export const secret = 'premature optimization is the root of all evil'
