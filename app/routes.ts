@@ -8,21 +8,21 @@
  *                                                                            *
 ===============================================================================
 */
-import * as path from 'path'
 import * as assert from 'assert'
-import * as fs from 'fs-extra'
+import * as crypto from 'crypto'
+import * as path from 'path'
 import { promisify } from 'util'
+
+import * as fs from 'fs-extra'
 import * as csv from 'csv-express'
 import * as request from 'request'
 import * as multer from 'multer'
-
-import { createDecipher } from 'crypto'
 
 /* local modules */
 import * as fsutils from './utils/fsutils'
 import * as csvutils from './utils/csvutils'
 
-import * as secret from '../config/secret'
+import { secret } from '../config/secret'
 
 /* Path for file upload is initialized at '../files' and is updated
    as the user navigates through different directories. */
@@ -58,8 +58,8 @@ export default app => {
      * making it possible for collaborators to access files without being part of the system.
      */
     app.get('/id/:id', async (req, res) => {
-        const decipher = createDecipher('aes192', secret.password)
-        const filepath = decipher.update(req.params.id, 'hex', 'utf8') + decipher.final('utf-8')
+        const decipher = crypto.createDecipher('aes192', secret)
+        const filepath = decipher.update(req.params.id, 'hex', 'utf8') + decipher.final('utf8')
         handleGetRequest(req, res, filepath)
     })
 
@@ -73,8 +73,8 @@ export default app => {
      * This function handles GET request, whether the file path was directly accessed
      * or was requested through a path id.
      */
-    async function handleGetRequest(req, res, filepath) {
-        const fullpath = path.join(__dirname, '../..', filepath)
+    async function handleGetRequest(req, res, filepath: string) {
+        const fullpath: string = path.join(__dirname, '../..', filepath)
         try {
             const meta = await fsutils.getFileEntry(filepath)
             if (req.query.view === 'meta') {
@@ -110,8 +110,8 @@ export default app => {
                     /* If parameters have not been specified, the backend assumes this is the
                        initial load and sends the metadata (column headers). */
                     if (req.query.cols === undefined) {
-                        const headers = await csvutils.getCsvHeaders(fullpath)
-                        res.render('dataview', {headers, meta, loggedIn: true})
+                        // const headers = await csvutils.getCsvHeaders(fullpath)
+                        // res.render('dataview', {headers, meta, loggedIn: true})
 
                     /* If column parameters have been specified, backend returns a CSV response
                        with the entries from the selected columns. */
@@ -161,15 +161,6 @@ export default app => {
                     }
                     if (err) { return err }
                     const uploadedFilename = req.files.userFile[0].originalname
-
-                    if (filelist.filter(f => f.file_name === uploadedFilename).length !== 0) {
-                        // File already exists
-                        console.log('File', uploadedFilename, 'already exists.')
-                        req.flash('alert', 'File already exists.')
-                        res.locals.message = req.flash()
-                        res.render('filebrowse', {loggedIn: true})
-                        return
-                    }
 
                     // form element in HTML must be named userFile as well
                     if (req.files.userFile) {
