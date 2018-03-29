@@ -7,18 +7,18 @@ import * as morgan from 'morgan' // logging
 import * as bodyParser from 'body-parser'
 import * as cookieParser from 'cookie-parser'
 import * as session from 'express-session'
+import * as cors from 'cors'
 import * as colors from 'colors'
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-/* Setting up Express application */
-app.use(cookieParser()) // reads cookies
-app.use(bodyParser.json()) // gets data from response body
+app.use(cookieParser())
+app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
-/* Setting up logging */
 app.use(morgan('dev'))
+app.use(cors())
 
 /* Disables caches -- remove for production */
 app.disable('etag')
