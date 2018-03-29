@@ -5,12 +5,12 @@
  *                                                                            *
 ===============================================================================
  */
-import * as fs from 'fs'
 import * as path from 'path'
+import * as fs from 'fs'
 import { promisify } from 'util'
 
-import { createCipher } from 'crypto'
-import * as secret from '../../config/secret'
+import * as crypto from 'crypto'
+import { secret } from '../../config/secret'
 
 interface IFileEntry {
     file_path: string,
@@ -19,7 +19,7 @@ interface IFileEntry {
     supported_views: {},
     type: 'directory' | 'tabular' | 'scalable_image' | 'file',
     metadata: {},
-    status: string,
+    status: 'uploading' | 'preprocessing' | 'ready',
     children?: IFileEntry[]
 }
 
@@ -30,10 +30,10 @@ interface IFileEntry {
  * @returns {Promise<IFileEntry[]>} A sorted list of file entries, complete with metadata.
  */
 export const listFiles = async (parentPath: string): Promise<IFileEntry[]> => {
-    const syspath = path.join(__dirname, '../..', parentPath)
-    const fileNameArr = await promisify(fs.readdir)(syspath)
+    const fullPath: string = path.join(__dirname, '../..', parentPath)
+    const fileNameArr: string[] = await promisify(fs.readdir)(fullPath)
 
-    const filelist = await scanFiles(parentPath, fileNameArr)
+    const filelist: IFileEntry[] = await scanFiles(parentPath, fileNameArr)
     return filelist.filter(file => file !== undefined)
         .sort(compareEntries)
 }
@@ -43,21 +43,21 @@ export const listFiles = async (parentPath: string): Promise<IFileEntry[]> => {
  *     as required in the protocol.
  *
  * @param {string} parentPath - Path to the parent directory to look in.
- * @param {!Array} fileNameArr - Array of names of files contained in directory.
- * @returns {!Array} Array of files complete with metadata.
+ * @param {string[]} fileNameArr - Array of names of files contained in directory.
+ * @returns {Promise<IFileEntry[]>} Array of files complete with metadata.
  */
 const scanFiles = (parentPath: string, fileNameArr: string[]): Promise<IFileEntry[]> => {
     return Promise.all(fileNameArr.map(async fileName => {
         // Files whose names start with '.' should not be displayed.
         if (fileName.startsWith('.')) {
-            return
+            return undefined
         }
         try {
-            const filePath = path.join(parentPath, fileName)
+            const filePath: string = path.join(parentPath, fileName)
             return await getFileEntry(filePath)
         } catch (e) {
             console.log('Could not get stats for file ' + fileName)
-            return
+            return undefined
         }
     }))
 }
@@ -72,14 +72,14 @@ const initialMetadata = {
  * Returns an entry for the file specified, complete with metadata.
  *
  * @param {string} filePath - Path to the file to retrieve metadata for.
- * @returns {!Obj} File entry containing all of the relevant metadata.
+ * @returns {Promise<IFileEntry>} File entry containing all of the relevant metadata.
  */
 export const getFileEntry = async (filePath: string): Promise<IFileEntry> => {
-    const file = path.basename(filePath)
-    const stats = await promisify(fs.lstat)(path.join(__dirname, '../..', filePath))
+    const file: string = path.basename(filePath)
+    const stats: fs.Stats = await promisify(fs.lstat)(path.join(__dirname, '../..', filePath))
 
-    const cipher = createCipher('aes192', secret.password)
-    const id = cipher.update(filePath, 'utf8', 'hex') + cipher.final('hex')
+    const cipher: crypto.Cipher = crypto.createCipher('aes192', secret)
+    const id: string = cipher.update(filePath, 'utf8', 'hex') + cipher.final('hex')
 
     if (stats.isDirectory()) {
         return {

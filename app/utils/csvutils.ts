@@ -9,6 +9,14 @@ import * as fs from 'fs'
 import * as csv from 'fast-csv'
 import * as firstline from 'firstline'
 
+interface ICsvMetadata {
+    columns: [{
+        header: string,
+        type: 'number' | 'category',
+    }],
+    rows: number
+}
+
 /** Retrieves CSV headers for the initial load */
 export const getCsvHeaders = async (filepath: string): Promise<any> => {
     const line = await firstline(filepath)
