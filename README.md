@@ -12,7 +12,7 @@ This application was tested using
 Dependencies can be installed by running
 
 ```sh
-$ npm install
+$ yarn install
 ```
 
 ## Usage
@@ -20,11 +20,10 @@ $ npm install
 Run 
 
 ```sh
-$ npm start
+$ yarn start
 ```
 
 ## License
 
-MIT License 2017-2018 Ryosuke Minami
-
+MIT License (c) 2017-2018 Ryosuke Minami. \
 For further information, click [here](./LICENSE.md).
