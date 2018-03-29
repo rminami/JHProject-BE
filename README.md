@@ -18,7 +18,7 @@ $ yarn install
 
 ## Usage
 
-Run 
+Run
 
 ```sh
 $ yarn start
