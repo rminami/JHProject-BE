@@ -10,9 +10,12 @@ import * as session from 'express-session'
 import * as cors from 'cors'
 import * as colors from 'colors'
 
-const app = express()
-const PORT = process.env.PORT || 3000
+import routes from './app/routes'
 
+const PORT = process.env.PORT || 3000
+const ENV = process.env.ENV || 'development'
+
+const app = express()
 app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
@@ -24,13 +27,11 @@ app.use(cors())
 app.disable('etag')
 
 app.use(session({
-    secret: 'utahinrichs', // session secret; can be anything
-    resave: false, // resave is unnecessary because session store has touch
+    secret: 'utahinrichs',    // session secret; can be anything
+    resave: false,
     saveUninitialized: false, // no need to identify users who do not log in
 }))
 
-/* Setting up routes */
-import routes from './app/routes'
 const expressRoutes = routes(app)
 
 app.listen(PORT, () => {
