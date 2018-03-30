@@ -19,8 +19,8 @@ import * as request from 'request'
 import * as multer from 'multer'
 
 /* local modules */
-import * as fsutils from './utils/fsutils'
-import * as csvutils from './utils/csvutils'
+import { getFileEntry, listFiles } from './utils/fsutils'
+import { getCsvHeaders, getCsvColumns } from './utils/csvutils'
 
 import { secret } from '../config/secret'
 
@@ -76,10 +76,10 @@ export default app => {
     async function handleGetRequest(req, res, filepath: string) {
         const fullpath: string = path.join(__dirname, '../..', filepath)
         try {
-            const meta = await fsutils.getFileEntry(filepath)
+            const meta = await getFileEntry(filepath)
             if (req.query.view === 'meta') {
                 if (req.query.include_children !== undefined) {
-                    meta.children = await fsutils.listFiles(filepath)
+                    meta.children = await listFiles(filepath)
                 }
                 return res.json(meta)
             }
@@ -87,7 +87,7 @@ export default app => {
 
             // Renders file browse window if the selected path is a directory.
             if (stats.isDirectory()) {
-                // const filelist = await fsutils.listFiles(filepath);
+                // const filelist = await listFiles(filepath);
                 res.render('filebrowse', {message: '', meta, loggedIn: true})
 
             } else if (stats.isFile()) {
@@ -103,21 +103,21 @@ export default app => {
                 if (ext === '.csv') {
                     /* If the query includes view=headers, sends a JSON with the headers. */
                     if (req.query.view === 'headers') {
-                        const headers = await csvutils.getCsvHeaders(fullpath)
+                        const headers = await getCsvHeaders(fullpath)
                         res.json(headers)
                         return
                     }
                     /* If parameters have not been specified, the backend assumes this is the
                        initial load and sends the metadata (column headers). */
                     if (req.query.cols === undefined) {
-                        // const headers = await csvutils.getCsvHeaders(fullpath)
+                        // const headers = await getCsvHeaders(fullpath)
                         // res.render('dataview', {headers, meta, loggedIn: true})
 
                     /* If column parameters have been specified, backend returns a CSV response
                        with the entries from the selected columns. */
                     } else {
                         const cols = req.query.cols.split(',').map(col => parseInt(col, 10))
-                        const data = await csvutils.getCsvColumns(fullpath, cols)
+                        const data = await getCsvColumns(fullpath, cols)
                         res.csv(data)
                     }
 
@@ -146,7 +146,7 @@ export default app => {
             if (req.query.action === 'upload') {
                 storagePath = fullpath
 
-                const filelist = await fsutils.listFiles(filepath)
+                const filelist = await listFiles(filepath)
 
                 upload(req, res, err => {
                     /* When the file uploader is empty. */
