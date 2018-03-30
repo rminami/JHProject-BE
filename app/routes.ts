@@ -24,29 +24,29 @@ import * as csvutils from './utils/csvutils'
 
 import { secret } from '../config/secret'
 
-/* Path for file upload is initialized at '../files' and is updated
-   as the user navigates through different directories. */
-let storagePath = path.join(__dirname, '../../files')
-
-/* Handles file storage for uploaded files through multer. */
-const storage = multer.diskStorage({
-    destination: (req, file, callback) => {
-        callback(null, storagePath)
-    },
-    filename: (req, file, callback) => {
-        callback(null, file.originalname)
-    },
-})
-
-/* Options for file uploads with multer can be configured here. */
-const upload = multer({
-    storage,
-}).fields([
-    // Only allows one file to be uploaded for the time being.
-    { name: 'userFile', maxCount: 1 },
-])
-
 export default app => {
+
+    /* Path for file upload is initialized at '../files' and is updated
+    as the user navigates through different directories. */
+    let storagePath: string = path.join(__dirname, '../../files')
+
+    /* Handles file storage for uploaded files through multer. */
+    const storage = multer.diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, storagePath)
+        },
+        filename: (req, file, callback) => {
+            callback(null, file.originalname)
+        },
+    })
+
+    /* Options for file uploads with multer can be configured here. */
+    const upload = multer({
+        storage,
+    }).fields([
+        // Only allows one file to be uploaded for the time being.
+        { name: 'userFile', maxCount: 1 },
+    ])
 
     app.get('/', (req, res) => {
         res.redirect('/files')
@@ -59,13 +59,13 @@ export default app => {
      */
     app.get('/id/:id', async (req, res) => {
         const decipher = crypto.createDecipher('aes192', secret)
-        const filepath = decipher.update(req.params.id, 'hex', 'utf8') + decipher.final('utf8')
+        const filepath: string = decipher.update(req.params.id, 'hex', 'utf8') + decipher.final('utf8')
         handleGetRequest(req, res, filepath)
     })
 
     // GET requests for everything else are handled through this path
     app.get('/files*', async (req, res) => {
-        const filepath = decodeURIComponent(req.path)
+        const filepath: string = decodeURIComponent(req.path)
         handleGetRequest(req, res, filepath)
     })
 
