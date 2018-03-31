@@ -1,6 +1,8 @@
 node_modules/
 built/*
-dist/
+dist/*
+!dist/README.md
+!dist/files
 tests/cases/rwc/*
 tests/cases/test262/*
 tests/cases/perf/*
