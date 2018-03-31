@@ -21,9 +21,6 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(morgan('dev'))
 app.use(cors())
 
-/* Disables caches -- remove for production */
-app.disable('etag')
-
 app.use(session({
     secret: 'utahinrichs',    // session secret; can be anything
     resave: false,
