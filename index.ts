@@ -10,7 +10,7 @@ import * as colors from 'colors'
 
 import routes from './app/routes'
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 const ENV = process.env.ENV || 'development'
 
 const app = express()
