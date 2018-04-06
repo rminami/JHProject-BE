@@ -9,6 +9,9 @@ import * as fs from 'fs'
 import * as csv from 'fast-csv'
 import * as firstline from 'firstline'
 
+/**
+ * An interface specifying the format in which CSV metadata should be returned.
+ */
 interface ICsvMetadata {
   columns: [{
     header: string,
@@ -17,12 +20,17 @@ interface ICsvMetadata {
   rows: number
 }
 
-/** Retrieves CSV headers for the initial load */
-export const getCsvHeaders = async (filepath: string): Promise<any> => {
+/**
+ * Retrieves CSV metadata.
+ *
+ * @param {string} filepath - Path to the CSV file.
+ * @returns {Promise<ICsvMetadata>} - A promise for CSV metadata.
+ */
+export const getCsvHeaders = async (filepath: string): Promise<ICsvMetadata> => {
   const line = await firstline(filepath)
   const headerArr = line.split(',').map(item => item.replace(/^"?(.+?)"?$/, '$1'))
 
-  return new Promise((resolve, reject) => {
+  return new Promise<ICsvMetadata>((resolve, reject) => {
     const sets = headerArr.map(_ => new Set())
     let rows = -1 // To account for the header line
 
@@ -52,9 +60,11 @@ export const getCsvHeaders = async (filepath: string): Promise<any> => {
   })
 }
 
-/** Retrieves data from specific columns within a CSV */
-export const getCsvColumns = async (filepath: string, columns: number[]): Promise<any> => {
-  return new Promise((resolve, reject) => {
+/**
+ * Retrieves data from specific columns within a CSV
+ */
+export const getCsvColumns = async (filepath: string, columns: number[]): Promise<number[][]> => {
+  return new Promise<number[][]>((resolve, reject) => {
     const result = []
     fs.createReadStream(filepath).pipe(csv())
       .on('data', data => {
