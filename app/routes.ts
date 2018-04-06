@@ -58,7 +58,7 @@ export default app => {
 
   // GET requests for everything else are handled through this path
   app.get('/files*', async (req, res) => {
-    const filepath: string = decodeURIComponent(req.path)
+    const filepath = decodeURIComponent(req.path)
     handleGetRequest(req, res, filepath)
   })
 
@@ -69,7 +69,7 @@ export default app => {
    */
   app.get('/id/:id', async (req, res) => {
     const decipher = crypto.createDecipher('aes192', secret)
-    const filepath: string = decipher.update(req.params.id, 'hex', 'utf8')
+    const filepath = decipher.update(req.params.id, 'hex', 'utf8')
       + decipher.final('utf8')
     handleGetRequest(req, res, filepath)
   })
@@ -79,7 +79,7 @@ export default app => {
    * or was requested through a path id.
    */
   async function handleGetRequest(req, res, filepath: string) {
-    const fullpath: string = path.join(__dirname, '../..', filepath)
+    const fullpath = path.join(__dirname, '../..', filepath)
     try {
       const meta = await getFileEntry(filepath)
       if (req.query.view === 'meta') {
@@ -179,12 +179,7 @@ export default app => {
       }
     } catch (e) {
       error(e)
-      res.status(e.status || 500).json({
-        error: {
-          status_code: e.status || 500,
-          message: e.code,
-        },
-      })
+      res.status(e.status || 500).json({ error: { message: e.code } })
       return
     }
   })
