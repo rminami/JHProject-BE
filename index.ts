@@ -36,6 +36,8 @@ app.use(session({
 
 const expressRoutes = routes(app)
 
+log('Running in ' + ENV + ' mode.')
+
 app.listen(PORT, () => {
   log('App is listening at http://127.0.0.1:' + PORT + '/')
 
