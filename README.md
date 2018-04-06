@@ -27,4 +27,4 @@ $ yarn start
 ## License
 
 MIT License (c) 2017-2018 Ryosuke Minami. \
-For further information, click [here](./LICENSE).
+For more information, see the [`LICENSE`](./LICENSE).
