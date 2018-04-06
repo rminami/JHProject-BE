@@ -13,7 +13,6 @@ import * as crypto from 'crypto'
 import { secret } from '../../config/secret'
 
 /**
- * @interface
  * Interface for an object representing the metadata of a file or directory.
  */
 interface IFileEntry {
