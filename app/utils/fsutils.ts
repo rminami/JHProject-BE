@@ -10,6 +10,7 @@ import * as fs from 'fs'
 import { promisify } from 'util'
 
 import * as crypto from 'crypto'
+import { getCsvHeaders } from './csvutils'
 import { secret } from '../../config/secret'
 
 /**
@@ -58,7 +59,7 @@ const scanFiles = (parentPath: string, fileNameArr: string[]): Promise<IFileEntr
     }
     try {
       const filePath: string = path.join(parentPath, fileName)
-      return await getFileEntry(filePath)
+      return await getFileEntry(filePath, true)
     } catch (e) {
       throw new Error('Could not get stats for file ' + fileName)
     }
@@ -75,9 +76,11 @@ const initialMetadata = Object.freeze({
  * Returns an object containing the metadata for the selected file or directory.
  *
  * @param {string} filePath - Path to the file to retrieve metadata for.
+ * @param {boolean} asChild - Specifies whether or not the metadata is being
+ *     requested as a child of a parent directory.
  * @returns {Promise<IFileEntry>} Object containing metadata for selected file.
  */
-export const getFileEntry = async (filePath: string): Promise<IFileEntry> => {
+export const getFileEntry = async (filePath: string, asChild: boolean): Promise<IFileEntry> => {
   const file: string = path.basename(filePath)
   const stats: fs.Stats = await promisify(fs.lstat)(path.join(__dirname, '../..', filePath))
 
@@ -110,10 +113,8 @@ export const getFileEntry = async (filePath: string): Promise<IFileEntry> => {
           raw: {
             size: stats.size,
           },
-          tabular: {
-            // Although the spec specifies metadata to be placed here,
-            // this is unnecessary for the file view.
-          },
+          // slice is necessary to remove the '/' at the beginning.
+          tabular: asChild ? {} : await getCsvHeaders(filePath.slice(1)),
         },
         type: 'tabular',
         metadata: initialMetadata,
