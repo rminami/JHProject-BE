@@ -81,7 +81,7 @@ export default app => {
   async function handleGetRequest(req, res, filepath: string) {
     const fullpath = path.join(__dirname, '../..', filepath)
     try {
-      const meta = await getFileEntry(filepath)
+      const meta = await getFileEntry(filepath, false)
       if (req.query.view === 'meta') {
         if (req.query.include_children !== undefined) {
           meta.children = await listFiles(filepath)
