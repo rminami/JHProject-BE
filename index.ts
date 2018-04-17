@@ -6,6 +6,10 @@ import * as cookieParser from 'cookie-parser'
 import * as session from 'express-session'
 import * as cors from 'cors'
 
+import * as passport from 'passport'
+import * as mongoose from 'mongoose'
+import * as flash from 'connect-flash'
+
 // Logger and debugger
 import * as debug from 'debug'
 import * as colors from 'colors'
@@ -14,6 +18,8 @@ import * as morganDebug from 'morgan-debug'
 import * as supportsColor from 'supports-color'
 
 import routes from './app/routes'
+import passportConfig from './config/passport'
+import { databaseURL } from './config/database'
 
 const PORT = process.env.PORT || 4000
 const ENV = process.env.ENV || 'development'
@@ -34,13 +40,26 @@ app.use(session({
   saveUninitialized: false, // no need to identify users who do not log in
 }))
 
-const expressRoutes = routes(app)
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(flash())
 
-log('Running in ' + ENV + ' mode.')
+passportConfig(passport)
+const expressRoutes = routes(app, passport)
 
-app.listen(PORT, () => {
-  log('App is listening at http://127.0.0.1:' + PORT + '/')
+log(`Running in ${ENV} mode.`)
 
-}).on('error', err => {
-  error('error '.red + 'Port ' + PORT + ' is already in use.')
+mongoose.connect(databaseURL)
+.then(() => {
+  log('Connected to MongoDB.')
+  app.listen(PORT, () => {
+    log(`App is listening at http://127.0.0.1:${PORT}/`)
+  }).on('error', e => {
+    error('Server could not be started.')
+    error('Are you sure the port is not in use?')
+  })
+})
+.catch(err => {
+  error('Could not connect to MongoDB.')
+  process.exit(1)
 })

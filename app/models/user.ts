@@ -5,14 +5,6 @@ import * as bcrypt from 'bcrypt-nodejs'
 const hashRounds = 12
 
 /**
- * Interface for user model.
- */
-interface IUser extends Document {
-  email: string
-  password: string
-}
-
-/**
  * User schema only has email address and password for now.
  * Might be a good idea to add first name, last name, role, etc.
  */
@@ -33,9 +25,9 @@ userSchema.methods.generateHash = (password: string): string => (
 /**
  * Checks if the password is valid.
  */
-userSchema.methods.validPassword = (password: string): string => (
-  bcrypt.compareSync(password, this.local.password)
-)
+userSchema.methods.validPassword = function(password: string): string {
+  return bcrypt.compareSync(password, this.local.password)
+}
 
 /**
  * Exposes model to the rest of the backend.

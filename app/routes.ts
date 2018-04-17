@@ -8,6 +8,7 @@
  *                                                                            *
 ===============================================================================
 */
+import { Request, Response, NextFunction } from 'express'
 import * as assert from 'assert'
 import * as crypto from 'crypto'
 import * as path from 'path'
@@ -28,7 +29,7 @@ import { getCsvHeaders, getCsvColumns } from './utils/csvutils'
 
 import { secret } from '../config/secret'
 
-export default app => {
+export default (app, passport) => {
 
   /* Path for file upload is initialized at '../files' and is updated
   as the user navigates through different directories. */
@@ -52,12 +53,37 @@ export default app => {
     { name: 'userFile', maxCount: 1 },
   ])
 
-  app.get('/', (req, res) => {
-    res.redirect('/files')
+  /**
+   * Middleware to make sure the user is logged in.
+   */
+  const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+    // Don't do anything if the user is authenticated.
+    if (req.isAuthenticated()) {
+        return next()
+    }
+    // Send 403 if user is not authenticated.
+    res.status(403).json({ error: { message: 'User not authorized.' }})
+  }
+
+  /**
+   * Handles user authentication. If the username/password combination is correct,
+   * a session cookie is given to the client.
+   */
+  app.post('/login', passport.authenticate('local-login', {
+    successRedirect: '/',
+    failureRedirect: '/error'
+  }))
+
+  app.get('/', (req: Request, res: Response) => {
+    res.json({ success: { message: 'You\'ve successfully connected to the backend server.' } })
+  })
+
+  app.get('/error', (req: Request, res: Response) => {
+    res.status(403).json({ error: { message: 'Unable to authorize user.' } })
   })
 
   // GET requests for everything else are handled through this path
-  app.get('/files*', async (req, res) => {
+  app.get('/files*', isLoggedIn, async (req: Request, res: Response) => {
     const filepath = decodeURIComponent(req.path)
     handleGetRequest(req, res, filepath)
   })
@@ -82,23 +108,35 @@ export default app => {
     const fullpath = path.join(__dirname, '../..', filepath)
     try {
       const meta = await getFileEntry(filepath, false)
+      const stats = await promisify(fs.lstat)(fullpath)
+      /**
+       * If the meta view is specified, backend returns metadata.
+       */
       if (req.query.view === 'meta') {
-        if (req.query.include_children !== undefined) {
+        /**
+         * If the parameter include_children is included in the query, and the
+         * specified path corresponds to a directory, include the metadata for
+         * the children as well.
+         */
+        if (req.query.include_children && stats.isDirectory()) {
           meta.children = await listFiles(filepath)
         }
         res.json(meta)
         return
       }
-      const stats = await promisify(fs.lstat)(fullpath)
 
-      // Renders file browse window if the selected path is a directory.
       if (stats.isDirectory()) {
-        // const filelist = await listFiles(filepath);
-        res.render('filebrowse', { message: '', meta, loggedIn: true })
+          /**
+           * Path corresponding to directory should not be called unless
+           * meta view is specified.
+           */
+          res.status(400).json({ error: { message: 'Invalid path' }})
+          return
 
       } else if (stats.isFile()) {
-        /* If the query includes an action query 'download',
-           send the raw file for download. */
+        /**
+         * If the query includes action parameter 'download', send the raw file.
+         */
         if (req.query.action === 'download') {
           res.sendFile(fullpath)
           return
@@ -107,38 +145,36 @@ export default app => {
 
         /* If the file selected is a CSV, the data visualization window is loaded. */
         if (ext === '.csv') {
-          /* If the query includes view=headers, sends a JSON with the headers. */
-          if (req.query.view === 'headers') {
-            const headers = await getCsvHeaders(fullpath)
-            res.json(headers)
-            return
-          }
-          /* If parameters have not been specified, the backend assumes this is the
-             initial load and sends the metadata (column headers). */
-          if (req.query.cols === undefined) {
-            const headers = await getCsvHeaders(fullpath)
-            res.render('dataview', {headers, meta, loggedIn: true})
-
-            /* If column parameters have been specified, backend returns a CSV response
-               with the entries from the selected columns. */
-          } else {
+          /**
+           * If column parameters have been specified, backend returns a CSV
+           * response with the entries from the selected columns.
+           */
+          if (req.query.cols) {
             const cols = req.query.cols.split(',').map(col => parseInt(col, 10))
             const data = await getCsvColumns(fullpath, cols)
             res.csv(data)
+            return
+          } else {
+            /**
+             * No other views are supported.
+             */
+            res.status(400).json({ error: { message: 'Invalid path' }})
+            return
           }
-        /*
-         * If the file selected is an image, the image navigation window is loaded.
-         * Any image should be preprocessed by the backend into a zoomable image.
-         */
         } else if (ext === '.png' || ext === '.jpg' || ext === '.dzi') {
+          /**
+           * Images have not been implemented yet.
+           */
           res.send('Image')
+          return
         } else {
           res.sendFile(fullpath)
+          return
         }
       }
     } catch (e) {
       error(e)
-      res.status(404).send('Path could not be read.')
+      res.status(500).json({ error: { message: 'Server error' }})
     }
   }
 
@@ -173,13 +209,11 @@ export default app => {
       } else if (req.query.action === 'delete') {
         const removed = await promisify(fs.remove)(fullpath)
         log('Deleted file. ')
-
         filepath = path.join(filepath, '..')
-        res.redirect(path.join(filepath, '..', '?success=true'))
       }
     } catch (e) {
       error(e)
-      res.status(e.status || 500).json({ error: { message: e.code } })
+      res.status(500).json({ error: { message: 'Server error' }})
       return
     }
   })
