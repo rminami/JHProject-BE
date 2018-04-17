@@ -6,8 +6,8 @@ This is a mock backend for the CS3099 Junior Honours project.
 
 This application was tested using
 
-- node v9.9.0
-- yarn v1.5.1
+- node v9.11.1
+- yarn v1.6.0
 - TypeScript v2.8.1
 
 Dependencies can be installed by running
