@@ -13,15 +13,21 @@ This application was tested using
 Dependencies can be installed by running
 
 ```sh
-$ yarn install
+yarn install
 ```
 
 ## Usage
 
-Run
+For development mode, run
 
 ```sh
-$ yarn start
+yarn run dev
+```
+
+Or, for production mode, run
+
+```sh
+yarn start
 ```
 
 ## License
