@@ -16,20 +16,26 @@ const userSchema: Schema = new Schema({
 })
 
 /**
- * Hashes passwords using bcrypt before storing them in the database.
+ * Hashes passwords using bcrypt.
+ *
+ * @param {string} password - The password, in cleartext
+ * @returns {string} - The hash generated from the password.
  */
 userSchema.methods.generateHash = (password: string): string => (
-  bcrypt.hashSync(password, bcrypt.genSaltSync(hashRounds), null)
+  bcrypt.hashSync(password, bcrypt.genSaltSync(hashRounds))
 )
 
 /**
- * Checks if the password is valid.
+ * Checks if the password is valid by comparing hash values.
+ *
+ * @param {string} password - The password to check.
+ * @returns {boolean} - Whether or not the hash matches that of the user.
  */
-userSchema.methods.validPassword = function(password: string): string {
+userSchema.methods.validPassword = function(password: string): boolean {
   return bcrypt.compareSync(password, this.local.password)
 }
 
 /**
- * Exposes model to the rest of the backend.
+ * Exposes model to the rest of the backend server.
  */
 export const User = model('User', userSchema)

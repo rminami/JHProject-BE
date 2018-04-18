@@ -61,7 +61,11 @@ export const getCsvHeaders = async (filepath: string): Promise<ICsvMetadata> => 
 }
 
 /**
- * Retrieves data from specific columns within a CSV
+ * Parses CSV and retrieves data from the specified columns.
+ *
+ * @param {string} filepath - The file path of the CSV file.
+ * @param {number[]} columns - The indices of the columns to retrieve.
+ * @returns {Promise<number[][]>} - Data from the specified columns.
  */
 export const getCsvColumns = async (filepath: string, columns: number[]): Promise<number[][]> => {
   return new Promise<number[][]>((resolve, reject) => {
