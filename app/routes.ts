@@ -83,7 +83,7 @@ export default (app, passport) => {
   })
 
   // GET requests for everything else are handled through this path
-  app.get('/files*', isLoggedIn, async (req: Request, res: Response) => {
+  app.get('/files*', async (req: Request, res: Response) => {
     const filepath = decodeURIComponent(req.path)
     handleGetRequest(req, res, filepath)
   })
