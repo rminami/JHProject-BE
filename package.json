@@ -25,6 +25,7 @@
     "request": "^2.85.0"
   },
   "devDependencies": {
+    "@types/bcrypt-nodejs": "^0.0.30",
     "@types/cookie-parser": "^1.4.1",
     "@types/cors": "^2.8.3",
     "@types/debug": "^0.0.30",
