@@ -448,12 +448,6 @@ cryptiles@3.x.x:
   dependencies:
     boom "5.x.x"
 
-csv-express@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/csv-express/-/csv-express-1.2.2.tgz#84fc16420ee5a324e1e66e15fca28fbdb9a5cf64"
-  dependencies:
-    iconv-lite "^0.4.13"
-
 dashdash@^1.12.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
@@ -785,7 +779,7 @@ http-signature@~1.2.0:
     jsprim "^1.2.2"
     sshpk "^1.7.0"
 
-iconv-lite@0.4.19, iconv-lite@^0.4.13:
+iconv-lite@0.4.19:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
 
