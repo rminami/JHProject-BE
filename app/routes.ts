@@ -15,7 +15,6 @@ import * as path from 'path'
 import { promisify } from 'util'
 
 import * as fs from 'fs-extra'
-import * as csv from 'csv-express'
 import * as request from 'request'
 import * as multer from 'multer'
 
@@ -70,19 +69,28 @@ export default (app, passport) => {
    * a session cookie is given to the client.
    */
   app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/',
+    successRedirect: '/success',
     failureRedirect: '/error'
   }))
 
-  app.get('/', (req: Request, res: Response) => {
+  /**
+   * Successful login redirects here. For testing purposes only.
+   */
+  app.get('/success', (req: Request, res: Response) => {
     res.json({ success: { message: 'You\'ve successfully connected to the backend server.' } })
   })
 
+  /**
+   * Unsuccessful login redirects here. For testing purposes only.
+   */
   app.get('/error', (req: Request, res: Response) => {
     res.status(403).json({ error: { message: 'Unable to authorize user.' } })
   })
 
-  // GET requests for everything else are handled through this path
+  /**
+   * When the user sends a GET request for a certain file, it is routed through
+   * this function.
+   */
   app.get('/files*', async (req: Request, res: Response) => {
     const filepath = decodeURIComponent(req.path)
     handleGetRequest(req, res, filepath)
@@ -104,7 +112,7 @@ export default (app, passport) => {
    * This function handles GET request, whether the file path was directly accessed
    * or was requested through a path id.
    */
-  async function handleGetRequest(req, res, filepath: string) {
+  async function handleGetRequest(req: Request, res: Response, filepath: string) {
     const fullpath = path.join(__dirname, '../..', filepath)
     try {
       const meta = await getFileEntry(filepath, false)
@@ -138,12 +146,11 @@ export default (app, passport) => {
          * If the query includes action parameter 'download', send the raw file.
          */
         if (req.query.action === 'download') {
-          res.sendFile(fullpath)
+          res.download(fullpath)
           return
         }
         const ext = path.extname(filepath)
 
-        /* If the file selected is a CSV, the data visualization window is loaded. */
         if (ext === '.csv') {
           /**
            * If column parameters have been specified, backend returns a CSV
@@ -152,8 +159,11 @@ export default (app, passport) => {
           if (req.query.cols) {
             const cols = req.query.cols.split(',').map(col => parseInt(col, 10))
             const data = await getCsvColumns(fullpath, cols)
-            res.csv(data)
+
+            // Manually parsing CSV because csv-express stopped working for some reason
+            res.type('csv').send(data.map(row => row.join(',')).join('\n'))
             return
+
           } else {
             /**
              * No other views are supported.
@@ -184,8 +194,10 @@ export default (app, passport) => {
     const fullpath = path.join(__dirname, '..', filepath)
 
     try {
-      /* File uploads are handled here. Chunking for large files is handled
-         by multer and are not dealt with here. */
+      /**
+       * File uploads are handled here. Chunking for large files is handled
+       * by multer and are not dealt with here.
+       */
       if (req.query.action === 'upload') {
         storagePath = fullpath
 
@@ -207,6 +219,9 @@ export default (app, passport) => {
           }
         })
       } else if (req.query.action === 'delete') {
+        /**
+         * Deletes file.
+         */
         const removed = await promisify(fs.remove)(fullpath)
         log('Deleted file. ')
         filepath = path.join(filepath, '..')
