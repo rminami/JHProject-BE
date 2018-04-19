@@ -17,6 +17,7 @@ import * as morgan from 'morgan'
 import * as morganDebug from 'morgan-debug'
 import * as supportsColor from 'supports-color'
 
+// Local imports
 import routes from './app/routes'
 import passportConfig from './config/passport'
 import { databaseURL } from './config/database'
@@ -35,9 +36,9 @@ const error = debug('app:error')
 app.use(morganDebug('app:router', 'dev'))
 
 app.use(session({
-  secret: 'utahinrichs',
-  resave: false,
-  saveUninitialized: false, // no need to identify users who do not log in
+  secret: 'utahinrichs',     // change this for production
+  resave: false,             // touch function does everything we need
+  saveUninitialized: false,  // no need to identify users who do not log in
 }))
 
 app.use(passport.initialize())
@@ -56,7 +57,7 @@ mongoose.connect(databaseURL)
     log(`App is listening at http://127.0.0.1:${PORT}/`)
   }).on('error', e => {
     error('Server could not be started.')
-    error('Are you sure the port is not in use?')
+    error(`Are you sure port ${PORT} is not in use?`)
   })
 })
 .catch(err => {
