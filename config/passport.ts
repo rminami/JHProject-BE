@@ -1,3 +1,17 @@
+ /*
+===============================================================================
+ *                                                                            *
+ * Strategies for logging in and signing up.                                  *
+ *                                                                            *
+ * Strategy 'local-login' returns the user if the username/password           *
+ * combination is correct; otherwise, it returns an error.                    *
+ *                                                                            *
+ * Strategy 'local-signup' returns a new user and hashes their password if    *
+ * the username has not already been taken; otherwise, it returns an error.   *
+ *                                                                            *
+===============================================================================
+*/
+
 import * as passportLocal from 'passport-local'
 import { User } from '../app/models/user'
 
@@ -28,7 +42,7 @@ export default passport => {
       }
       if (!user || !user.validPassword(password)) {
         return done(undefined, false)
-          // req.flash('loginMessage', 'Incorrect username or password.'))
+          // req.flash('loginMessage', 'Incorrect username or password.')
       }
       // Return user if username/password combination is correct.
       return done(undefined, user)
