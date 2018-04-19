@@ -18,7 +18,7 @@ const userSchema: Schema = new Schema({
 /**
  * Hashes passwords using bcrypt.
  *
- * @param {string} password - The password, in cleartext
+ * @param {string} password - The password, in cleartext.
  * @returns {string} - The hash generated from the password.
  */
 userSchema.methods.generateHash = (password: string): string => (
