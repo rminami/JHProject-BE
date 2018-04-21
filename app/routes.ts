@@ -91,8 +91,10 @@ export default (app, passport) => {
    * When the user sends a GET request for a certain file, it is routed through
    * this function.
    */
-  app.get('/files*', async (req: Request, res: Response) => {
-    const filepath = decodeURIComponent(req.path)
+  app.get('/projects/:project_name/files*', async (req: Request, res: Response) => {
+    const pathEls = req.path.split('/').filter(p => p.length > 0).slice(2)
+    const pathInProject = '/' + pathEls.join('/')
+    const filepath = decodeURIComponent(pathInProject)
     handleGetRequest(req, res, filepath)
   })
 
@@ -101,7 +103,7 @@ export default (app, passport) => {
    * When files are accessed this way, the user does not have to be logged in,
    * making it possible for collaborators to access files without being part of the system.
    */
-  app.get('/id/:id', async (req, res) => {
+  app.get('/projects/:project_name/id/:id', async (req, res) => {
     const decipher = crypto.createDecipher('aes192', secret)
     const filepath = decipher.update(req.params.id, 'hex', 'utf8')
       + decipher.final('utf8')
@@ -129,7 +131,10 @@ export default (app, passport) => {
         if (req.query.include_children && stats.isDirectory()) {
           meta.children = await listFiles(filepath)
         }
-        res.json(meta)
+        res.json({ data: meta })
+        return
+      } else if (req.query.view === 'raw') {
+        res.sendFile(fullpath)
         return
       }
 

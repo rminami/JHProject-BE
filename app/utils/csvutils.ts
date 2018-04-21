@@ -41,6 +41,11 @@ export const getCsvHeaders = async (filepath: string): Promise<ICsvMetadata> => 
 
       }).on('end', () => {
         const columns = sets.map((set, index) => {
+          /**
+           * The column is categorized as a category column if there are 5 or
+           * fewer unique values; otherwise, it is categorized as a column of
+           * numerical values.
+           */
           if (set.size <= 5) {
             return ({
               header: headerArr[index],

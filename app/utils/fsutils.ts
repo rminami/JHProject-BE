@@ -87,6 +87,11 @@ export const getFileEntry = async (filePath: string, asChild: boolean): Promise<
   const cipher: crypto.Cipher = crypto.createCipher('aes192', secret)
   const id: string = cipher.update(filePath, 'utf8', 'hex') + cipher.final('hex')
 
+  // For consistency with Ryan's server -- testing purposes only
+  if (filePath.startsWith('/files/')) {
+    filePath = filePath.slice(7)
+  }
+
   if (stats.isDirectory()) {
     return {
       file_path: filePath,
@@ -114,7 +119,9 @@ export const getFileEntry = async (filePath: string, asChild: boolean): Promise<
             size: stats.size,
           },
           // slice is necessary to remove the '/' at the beginning.
-          tabular: asChild ? {} : await getCsvHeaders(filePath.slice(1)),
+          // tabular: asChild ? {} : await getCsvHeaders(filePath.slice(1)),
+          // for testing only
+          tabular: asChild ? {} : await getCsvHeaders('files/' + filePath),
         },
         type: 'tabular',
         metadata: initialMetadata,
