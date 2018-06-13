@@ -1,13 +1,13 @@
 # JHProject-BE
 
-This is a mock backend for the CS3099 Junior Honours project.
+A mock backend for the CS3099 Junior Honours Project.
 
 ## Installation
 
 This application was tested using
 
-- node v9.11.1
-- yarn v1.6.0
+- node v10.4.0
+- yarn v1.7.0
 - TypeScript v2.8.1
 
 Dependencies can be installed by running
@@ -21,7 +21,7 @@ yarn install
 For development mode, run
 
 ```sh
-yarn run dev
+yarn dev
 ```
 
 Or, for production mode, run
