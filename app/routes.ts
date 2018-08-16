@@ -56,36 +56,37 @@ export default (app, passport) => {
    * Middleware to make sure the user is logged in.
    */
   const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
-    // Don't do anything if the user is authenticated.
-    if (req.isAuthenticated()) {
-        return next()
-    }
-    // Send 403 if user is not authenticated.
-    res.status(403).json({ error: { message: 'User not authorized.' }})
+    // // Don't do anything if the user is authenticated.
+    // if (req.isAuthenticated()) {
+    //     return next()
+    // }
+    // // Send 403 if user is not authenticated.
+    // res.status(403).json({ error: { message: 'User not authorized.' }})
+    return next() // No check
   }
 
   /**
    * Handles user authentication. If the username/password combination is correct,
    * a session cookie is given to the client.
    */
-  app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/success',
-    failureRedirect: '/error'
-  }))
+  // app.post('/login', passport.authenticate('local-login', {
+  //   successRedirect: '/success',
+  //   failureRedirect: '/error'
+  // }))
 
   /**
    * Successful login redirects here. For testing purposes only.
    */
-  app.get('/success', (req: Request, res: Response) => {
-    res.json({ success: { message: 'You\'ve successfully connected to the backend server.' } })
-  })
+  // app.get('/success', (req: Request, res: Response) => {
+  //   res.json({ success: { message: 'You\'ve successfully connected to the backend server.' } })
+  // })
 
   /**
    * Unsuccessful login redirects here. For testing purposes only.
    */
-  app.get('/error', (req: Request, res: Response) => {
-    res.status(403).json({ error: { message: 'Unable to authorize user.' } })
-  })
+  // app.get('/error', (req: Request, res: Response) => {
+  //   res.status(403).json({ error: { message: 'Unable to authorize user.' } })
+  // })
 
   /**
    * When the user sends a GET request for a certain file, it is routed through
