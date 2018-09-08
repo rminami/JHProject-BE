@@ -3,7 +3,8 @@
  *                                                                            *
  * MongoDB instance for storing usernames and passwords.                      *
  *                                                                            *
- * The URL contains both the username and password - don't make this public!  *
+ * Note: this database is no longer online. Run your own MongoDB instance to  *
+ * test user authentication.                                                  *
  *                                                                            *
 ===============================================================================
 */
