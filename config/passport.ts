@@ -14,6 +14,7 @@
 
 import * as passportLocal from 'passport-local'
 import { User } from '../app/models/user'
+import { Request, Response } from 'express'
 
 const LocalStrategy = passportLocal.Strategy
 

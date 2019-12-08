@@ -35,18 +35,19 @@ const log = debug('app:log')
 const error = debug('app:error')
 app.use(morganDebug('app:router', 'dev'))
 
-app.use(session({
-  secret: 'utahinrichs',     // change this for production
-  resave: false,             // touch function does everything we need
-  saveUninitialized: false,  // no need to identify users who do not log in
-}))
+// app.use(session({
+//   secret: 'utahinrichs',     // change this for production
+//   resave: false,             // touch function does everything we need
+//   saveUninitialized: false,  // no need to identify users who do not log in
+// }))
 
-app.use(passport.initialize())
-app.use(passport.session())
+// app.use(passport.initialize())
+// app.use(passport.session())
 app.use(flash())
 
-passportConfig(passport)
-const expressRoutes = routes(app, passport)
+// passportConfig(passport)
+// const expressRoutes = routes(app, passport)
+const expressRoutes = routes(app, null)
 
 log(`Running in ${ENV} mode.`)
 
